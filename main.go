@@ -15,6 +15,7 @@ func main() {
 	config.InitViperEnv()
 	storage.ConnectDb()
 	r := routes.SetupRouter()
+
 	start(r)
 
 }

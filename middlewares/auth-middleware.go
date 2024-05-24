@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -22,27 +23,32 @@ func GenerateToken(userID int) (string, error) {
 	return tokenStr, nil
 }
 
-func ValidateToken(token string) (string, error) {
+func ValidateToken(token string) (int, error) {
 	if token == "" {
-		return "", jwt.ErrSignatureInvalid
+		return 0, jwt.ErrSignatureInvalid
 	}
 	tokenVal, err := jwt.Parse(token, func(tokenVal *jwt.Token) (interface{}, error) {
 		return []byte("ARCHLINUX"), nil
 	})
 	if err != nil {
-		return "", err
+		logrus.Error(err.Error())
+		return 0, err
 	}
 	if !tokenVal.Valid {
-		return "", jwt.ErrSignatureInvalid
+		logrus.Error("Инвалид токен")
+		return 0, jwt.ErrSignatureInvalid
 	}
 
 	claims, ok := tokenVal.Claims.(jwt.MapClaims)
 	if !ok {
-		return "", jwt.ErrInvalidKeyType
+		logrus.Error("Ошибка claims")
+		return 0, jwt.ErrInvalidKeyType
 	}
-	userID, ok := claims["id"].(string)
+	userIDFloat, ok := claims["userID"].(float64)
 	if !ok {
-		return "", jwt.ErrInvalidKeyType
+		logrus.Error("Ошибка userID")
+		return 0, jwt.ErrInvalidKeyType
 	}
+	userID := int(userIDFloat)
 	return userID, nil
 }

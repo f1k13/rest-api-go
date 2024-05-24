@@ -2,6 +2,7 @@ package storage
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -25,10 +26,11 @@ func ConnectDb() {
 	if err != nil {
 		panic("err")
 	}
-	err = Db.AutoMigrate(&User{})
+	err = Db.AutoMigrate(&User{}, &Account{}, &Record{}, &IncomeCategory{})
 	if err != nil {
-		fmt.Errorf("error")
+		logrus.Error(err.Error())
 	}
+	InitIncomeCategory()
 }
 
 type Model struct {

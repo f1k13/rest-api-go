@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"rest_api_go/internal/storage"
 	"rest_api_go/middlewares"
@@ -12,6 +13,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&isUser); err != nil {
 		http.Error(w, "Невозможно декодировать JSON", http.StatusBadRequest)
+		logrus.Error(err.Error())
+		return
 	}
 	var user storage.User
 
@@ -29,6 +32,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	token, err := middlewares.GenerateToken(user.Id)
 	if err != nil {
 		http.Error(w, "Ошибка генерации токена", http.StatusInternalServerError)
+		logrus.Error(err.Error())
 		return
 	}
 
@@ -38,6 +42,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, "Ошибка", http.StatusBadRequest)
+		logrus.Error(err.Error())
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -48,6 +54,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	var creds storage.User
 	if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
 		http.Error(w, "Невозможно декодировать JSON", http.StatusBadRequest)
+		logrus.Error(err.Error())
 		return
 	}
 
@@ -57,6 +64,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	if existUser.Username != "" {
 		http.Error(w, "Пользователь с таким именем уже существует", http.StatusBadRequest)
+		logrus.Error(err.Error())
 		return
 	}
 
@@ -68,6 +76,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	token, err := middlewares.GenerateToken(creds.Id)
 	if err != nil {
 		http.Error(w, "Ошибка генерации токена", http.StatusInternalServerError)
+		logrus.Error(err.Error())
 		return
 	}
 
@@ -75,6 +84,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	jsonRes, err := json.Marshal(res)
 	if err != nil {
 		http.Error(w, "Ошибка", http.StatusInternalServerError)
+		logrus.Error(err.Error())
 		return
 	}
 
